@@ -77,10 +77,24 @@ def search_advertisement(request: Request):
 
     result = []
     for ad in advertisements:
-        match = all(
-            field in allowed_fields and str(ad.get(field)) == str(value)
-            for field, value in params.items()
-        )
+        match = True
+        for field, value in params.items():
+            if field not in allowed_fields:
+                match = False
+                break
+            ad_value = ad.get(field)
+            if field == "price":
+                try:
+                    if float(ad_value) != float(value):
+                        match = False
+                        break
+                except (TypeError, ValueError):
+                    match = False
+                    break
+            else:
+                if str(ad_value) != str(value):
+                    match = False
+                    break
         if match:
             result.append(ad)
     return result
